@@ -9,18 +9,6 @@
 <link rel="icon" sizes="192x192" href="icons/icon-192.png" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
 <head>
-  <script>
-(function () {
-  const ok = sessionStorage.getItem('ok');
-  if (ok === '1') return;
-  const pass = prompt('Введите пароль:');
-  if (pass !== 'мойсекрет') {
-    document.body.innerHTML = '<h1>Доступ запрещён</h1>';
-    throw new Error('Wrong password');
-  }
-  sessionStorage.setItem('ok','1');
-})();
-</script>
   <div class="wrap">
     <header>
       <div class="title">
@@ -138,3 +126,4 @@
     </div>
 
   </div>
+
