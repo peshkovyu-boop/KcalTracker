@@ -1,0 +1,127 @@
+<link rel="stylesheet" href="style.css" />
+  <!-- Резервная библиотека для распознавания, если нет BarcodeDetector -->
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+  <script src="app.js" defer></script>
+<head>
+<link rel="manifest" href="./manifest.webmanifest" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4da3ff" />
+<link rel="icon" sizes="192x192" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<head>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <span class="dot"></span> Кальк-трекер
+        <span class="sub">(авто-ккал и БЖУ)</span>
+      </div>
+      <div class="row">
+        <input id="date" type="date" />
+        <button id="addEntryBtn" type="button" onclick="window.__addEntry()">Добавить строку</button>
+        <button id="saveDay" class="secondary" type="button">Сохранить день</button>
+        <button id="clearDay" class="secondary" type="button">Очистить день</button>
+        <div class="spacer"></div>
+        <button id="exportCsv" type="button">Экспорт CSV</button>
+        <label class="badge" style="cursor:pointer">
+          Импорт CSV<input id="importCsv" type="file" accept=".csv" style="display:none" />
+        </label>
+        <button id="clearAll" class="warn" type="button">Стереть всё</button>
+      </div>
+    </header>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="row" style="align-items:flex-start">
+        <div class="sub">Источники:</div>
+        <label class="chk"><input type="checkbox" id="useOnline" checked /> Подключить онлайн базу (Open Food Facts)</label>
+        <div class="badge">Локальная БД — резерв</div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <input id="barcode" type="text" placeholder="Штрих-код (EAN/UPC)" inputmode="numeric" />
+        <button id="findBarcode" type="button">Найти по штрих-коду</button>
+
+        <button id="scanCamera" type="button">Сканировать камерой</button>
+        <label class="badge" style="cursor:pointer">
+          Фото штрих-кода
+          <input id="barcodeImage" type="file" accept="image/*" capture="environment" style="display:none" />
+        </label>
+
+        <div class="sub" id="lookupStatus"></div>
+      </div>
+      <div class="tiny muted" style="margin-top:6px">
+        Онлайн-поиск подставляет значения на 100 г. Сверяйся с этикеткой.
+      </div>
+    </div>
+
+    <div class="grid card">
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Продукт</th>
+            <th>Вес, г</th>
+            <th>Ккал</th>
+            <th>Белки, г</th>
+            <th>Жиры, г</th>
+            <th>Углеводы, г</th>
+            <th class="tiny">Авто</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">ИТОГО за день</td>
+            <td id="tWeight">0</td>
+            <td id="tKcal">0</td>
+            <td id="tP">0</td>
+            <td id="tF">0</td>
+            <td id="tC">0</td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="card" id="viz">
+      <div class="row">
+        <select id="period">
+          <option value="day">День</option>
+          <option value="week">Неделя</option>
+          <option value="month">Месяц</option>
+          <option value="year">Год</option>
+        </select>
+        <input id="periodStart" type="date" />
+        <button id="refreshViz" type="button" class="secondary">Обновить</button>
+        <div class="spacer"></div>
+        <div class="sub" id="vizInfo"></div>
+      </div>
+      <div class="viz-grid">
+        <canvas id="barTotal" height="220"></canvas>
+        <canvas id="stackMacros" height="220"></canvas>
+        <canvas id="trendDaily" height="220"></canvas>
+      </div>
+    </div>
+
+    <p class="hint">
+      Начни вводить название — подгружаются варианты из Open Food Facts + локальной базы.
+    </p>
+  </div>
+
+  <!-- datalist -->
+  <datalist id="foods"></datalist>
+
+  <!-- Модал сканера -->
+  <div id="camModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="title tiny">Сканирование штрих-кода</div>
+        <button id="closeCam" type="button" class="secondary">Закрыть</button>
+      </div>
+      <div class="cam-wrap">
+        <video id="camVideo" autoplay playsinline></video>
+        <canvas id="camCanvas"></canvas>
+        <div id="camHint" class="hint">Наведи камеру на штрих-код…</div>
+      </div>
+    </div>
+  </div>
